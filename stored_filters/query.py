@@ -4,11 +4,18 @@ import re
 import operator
 
 from django.db.models import Q
+from stored_filters.helpers import fetch_lookups
+
+
+def filters_as_Q(filters, context=None):
+    filters = list(fetch_lookups(filters))
+    return QueryBuilder(context=context).convert_lookups_to_Q(filters)
+
 
 class QueryBuilder(object):
 
-    def __init__(self, user):
-        self.user = user
+    def __init__(self, context=None):
+        self.context = context or {}
 
     def convert_lookups_to_Q(self, lookups):
         lookups = self.exclude_blank(lookups)
@@ -50,11 +57,12 @@ class QueryBuilder(object):
         return Q(**lookup_dict)
 
     def process_macros(self, lookup_dict):
-        macro_regex = re.compile(r'^%(?P<attribute>\w+)%$')
+        macro_regex = re.compile(r'^%(?P<macros_key>\w+)%$')
         for key, value in lookup_dict.iteritems():
             match = macro_regex.match(value)
             if match:
-                attribute = match.group('attribute')
-                user_attribute_value = getattr(self.user, attribute)
-                lookup_dict[key] = user_attribute_value
+                macros_key = match.group('macros_key')
+                if macros_key in self.context:
+                    user_attribute_value = self.context[macros_key]
+                    lookup_dict[key] = user_attribute_value
 

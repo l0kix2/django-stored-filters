@@ -13,7 +13,10 @@ class LookupConvertionTest(BaseTest):
                                                email='batman@gotham.us')
         self.joker = User.objects.create_user(username='joker',
                                               email='joker@gotham.us')
-        self.builder = QueryBuilder(user=self.batman)
+        self.builder = QueryBuilder(context={
+            'username': self.batman.username,
+            'email': self.batman.email,
+        })
 
     def test_process_macros(self):
         lookup_dict = {'username': '%username%',
@@ -97,16 +100,6 @@ class LookupConvertionTest(BaseTest):
             User.objects.filter(query),
             [self.joker]
         )
-
-#    def test_merge_conditions_and_exclusions_to_Q_blank_filters(self):
-#        lookup_pair = {
-#            'conditions': None,
-#            'exclusions': None,
-#        }
-#
-#        query = self.builder.merge_conditions_and_exclusions_to_Q(lookup_pair)
-#
-#        self.assertIsNone(query)
 
     def test_convert_lookups_to_Q(self):
         lookups = [{

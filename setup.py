@@ -8,7 +8,7 @@ README_FILEPATH = os.path.join(CURRENT_DIR, 'README.rst')
 
 setup(
     name='django-stored-filters',
-    version='0.1',
+    version='0.1.1',
     packages=[
         'stored_filters',
         'stored_filters.tests',
